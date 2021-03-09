@@ -1,10 +1,10 @@
-# Resortolgy
-## CS348 Databases Project
+## Resortolgy
+### CS348 Databases Project
 
 ### Authors:
-Jack Arnold (github.com/jackarnold84)
-Rohan Shahani
-Emily Blanchard
+Jack Arnold (github.com/jackarnold84)  
+Rohan Shahani  
+Emily Blanchard  
 
 ### Description:
 
@@ -21,4 +21,4 @@ and managers.
 
 ### Database:
 
-The app uses a MySQL databased hosted by Google Cloud Platform.
+The app uses a MySQL database hosted on Google Cloud Platform.
