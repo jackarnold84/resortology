@@ -3,8 +3,8 @@
 
 ### Authors:
 Jack Arnold (github.com/jackarnold84)  
-Rohan Shahani  
-Emily Blanchard  
+Rohan Shahani (github.com/rshahani999)  
+Emily Blanchard (github.com/emlyblnchrd)  
 
 ### Description:
 
