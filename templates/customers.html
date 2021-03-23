@@ -1,0 +1,46 @@
+{% extends "layout.html" %}
+{% block page_title %}Manage Customers{% endblock %}
+{% block body %}
+    {{ super() }}
+
+    <p>
+      Here, you can manage customers and customer information for your
+      resort.
+    </p>
+
+    <!-- MENU SELECTION -->
+    <br>
+    <div class="w3-row-padding">
+      <div class="w3-third">
+      <a href="#" class="page_link">
+      <div class="w3-card">
+        <div class="w3-container">
+        <h4>Add Customer</h4>
+        </div>
+      </div>
+      </a>
+      </div>
+
+      <div class="w3-third">
+      <a href="#" class="page_link">
+      <div class="w3-card">
+        <div class="w3-container">
+        <h4>Edit Customer</h4>
+        </div>
+      </div>
+      </a>
+      </div>
+
+      <div class="w3-third">
+      <a href="#" class="page_link">
+      <div class="w3-card">
+        <div class="w3-container">
+        <h4>View All</h4>
+        </div>
+      </div>
+      </a>
+      </div>
+    </div>
+
+
+{% endblock %}

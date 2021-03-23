@@ -1,8 +1,80 @@
 {% extends "layout.html" %}
-{% block page_title %}Welcome: Home Page{% endblock %}
+{% block page_title %}Resortology - Home{% endblock %}
 {% block body %}
     {{ super() }}
 
-    <p>Resortoloy app coming soon!</p>
+    <p>
+      Welcome to Resortology! Select a menu item below to manage different
+      aspects of your resort.
+    </p>
+
+    <!-- MENU SELECTION -->
+    <br>
+    <div class="w3-row-padding">
+      <div class="w3-third">
+      <a href="#" class="page_link">
+      <div class="w3-card">
+        <div class="w3-container">
+        <h3>Bookings</h3>
+        </div>
+      </div>
+      </a>
+      </div>
+
+      <div class="w3-third">
+      <a href="#" class="page_link">
+      <div class="w3-card">
+        <div class="w3-container">
+        <h3>Invoices</h3>
+        </div>
+      </div>
+      </a>
+      </div>
+
+      <div class="w3-third">
+      <a href="#" class="page_link">
+      <div class="w3-card">
+        <div class="w3-container">
+        <h3>Resort</h3>
+        </div>
+      </div>
+      </a>
+      </div>
+    </div>
+
+    <br>
+    <div class="w3-row-padding">
+      <div class="w3-third">
+      <a href="/customers" class="page_link">
+      <div class="w3-card">
+        <div class="w3-container">
+        <h3>Customers</h3>
+        </div>
+      </div>
+      </a>
+      </div>
+
+
+      <div class="w3-third">
+      <a href="#" class="page_link">
+      <div class="w3-card">
+        <div class="w3-container">
+        <h3>Analytics</h3>
+        </div>
+      </div>
+      </a>
+      </div>
+
+      <div class="w3-third">
+      <a href="#" class="page_link">
+      <div class="w3-card">
+        <div class="w3-container">
+        <h3>Settings</h3>
+        </div>
+      </div>
+      </a>
+      </div>
+    </div>
+
 
 {% endblock %}

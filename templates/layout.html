@@ -1,32 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  
+
   <meta charset="utf-8">
   <title>Resortology</title>
   <link rel="icon" href="">
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-  <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
+  <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-teal.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 </head>
-  
-<!-- MAIN SECTION -->
-<div class="container">
-  
+
+<!-- NAVIGATION -->
+<div class="w3-bar w3-theme">
+  <a href="/" class="w3-bar-item w3-button w3-padding-16"><b>Resortology</b></a>
+  <a href="#" class="w3-bar-item w3-button w3-padding-16">Bookings</a>
+  <a href="#" class="w3-bar-item w3-button w3-padding-16">Invoices</a>
+  <a href="#" class="w3-bar-item w3-button w3-padding-16">Resort</a>
+  <a href="/customers" class="w3-bar-item w3-button w3-padding-16">Customers</a>
+  <a href="#" class="w3-bar-item w3-button w3-padding-16">Analytics</a>
+  <a href="#" class="w3-bar-item w3-button w3-padding-16">Settings</a>
+</div>
+
+<!-- BODY SECTION -->
+<div class="w3-container">
+
   <h1>{% block page_title %}{% endblock %}</h1>
-  
+
   <p>{% block body %}{% endblock %}</p>
 
 </div>
 
 <!-- ABOUT SECTION -->
-<div class='container'>
+<div class='w3-container'>
 <hr>
+About:<br>
 Developed by Jack Arnold, Emily Blanchard, Rohan Shahani<br>
-<a href='https://github.com/jackarnold84'>GitHub</a>
 </div>
 
 </html>

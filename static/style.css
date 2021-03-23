@@ -1,0 +1,11 @@
+/* style.css */
+/* custom classes to override template defaults */
+
+.page_link {
+  text-decoration: none;
+  text-align: center;
+}
+
+.page_link:hover {
+  color: #009688;
+}
