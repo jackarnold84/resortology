@@ -148,14 +148,16 @@
           <th>Phone</th>
           <th>Zip Code</th>
         </tr>
+        {% for c in customer_list %}
         <tr>
-          <td>1</td>
-          <td>Jill</td>
-          <td>Smith</td>
-          <td>jillsmith@gmail.com</td>
-          <td>3092488694</td>
-          <td>59584</td>
+          <td>{{ c[0] }}</td>
+          <td>{{ c[1] }}</td>
+          <td>{{ c[2] }}</td>
+          <td>{{ c[3] }}</td>
+          <td>{{ c[4] }}</td>
+          <td>{{ c[5] }}</td>
         </tr>
+        {% endfor %}
       </table>
 
     </div>

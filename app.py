@@ -1,5 +1,6 @@
 import os
-from flask import Flask, session, url_for, redirect, render_template, request, abort, flash
+import database as db
+from flask import Flask, session, url_for, redirect, render_template, request, abort
 
 app = Flask(__name__)
 # app.config.from_object('config')
@@ -15,19 +16,18 @@ def root():
 # CUSTOMER PAGES
 @app.route("/customers")
 def customers():
-    return render_template("customers.html")
+
+    customer_list = db.get_all_customers()
+
+    return render_template("customers.html", customer_list=customer_list)
 
 
 @app.route("/customers/add_customer", methods=['POST', 'GET'])
 def add_customer():
     if request.method == 'POST':
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
-        email = request.form['email']
-        phone_number = request.form['phone']
-        zip_code = request.form['zip_code']
-
-        print(first_name, last_name, email, phone_number, zip_code)
+        form = request.form
+        db.add_customer(form['first_name'], form['last_name'],
+                        form['email'], form['phone'], form['zip_code'])
 
         return 'added'
     else:
@@ -36,4 +36,8 @@ def add_customer():
 
 
 if __name__ == "__main__":
+
+    db.connect()
+    db.build_tables(reset=True)
+
     app.run(debug=True, host="127.0.0.1", port=5000)

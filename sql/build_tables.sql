@@ -1,9 +1,7 @@
-SET FOREIGN_KEY_CHECKS=0;
-
 DROP TABLE IF EXISTS customers;
 
 CREATE TABLE customers (
-    customer_id integer NOT NULL,
+    customer_id INT NOT NULL AUTO_INCREMENT,
     first_name varchar(30),
     last_name varchar(30),
     email varchar(50),
