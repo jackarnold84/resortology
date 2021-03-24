@@ -8,39 +8,156 @@
       resort.
     </p>
 
-    <!-- MENU SELECTION -->
+    <!-- TAB MANAGEMENT -->
     <br>
-    <div class="w3-row-padding">
-      <div class="w3-third">
-      <a href="#" class="page_link">
-      <div class="w3-card">
-        <div class="w3-container">
-        <h4>Add Customer</h4>
-        </div>
-      </div>
-      </a>
-      </div>
-
-      <div class="w3-third">
-      <a href="#" class="page_link">
-      <div class="w3-card">
-        <div class="w3-container">
-        <h4>Edit Customer</h4>
-        </div>
-      </div>
-      </a>
-      </div>
-
-      <div class="w3-third">
-      <a href="#" class="page_link">
-      <div class="w3-card">
-        <div class="w3-container">
-        <h4>View All</h4>
-        </div>
-      </div>
-      </a>
-      </div>
+    <div class="w3-border">
+    <div class="w3-bar w3-white w3-border">
+      <button class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Add Customer')">
+        Add Customer
+      </button>
+      <button class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Edit Customer')">
+        Edit Customer
+      </button>
+      <button class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Delete Customer')">
+        Delete Customer
+      </button>
+      <button class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'View All')">
+        View All
+      </button>
     </div>
 
+
+    <!-- ADD CUSTOMER -->
+    <div id="Add Customer" class="w3-container tabname w3-animate-opacity">
+      <h2>Add Customer</h2>
+
+      <form action="/customers/add_customer" method="post" autocomplete="off">
+
+        <br><label>First Name</label>
+        <input class="w3-input" type="text" name="first_name" required
+               maxlength="30">
+
+        <br><label>Last Name</label>
+        <input class="w3-input" type="text" name="last_name" required
+               maxlength="30">
+
+        <br><label>Email</label>
+        <input class="w3-input" type="email" name="email"
+               maxlength="50">
+
+        <br><label>Phone</label>
+        <input class="w3-input" type="tel" name="phone"
+               onkeypress="return isNumberKey(event)" maxlength="11">
+
+        <br><label>Zip Code</label>
+        <input class="w3-input" type="tel" name="zip_code"
+               onkeypress="return isNumberKey(event)" maxlength="5">
+
+        <br>
+        <input class="w3-button w3-theme" type="submit"
+               name="add_customer_submit" value="Add Customer">
+
+      </form>
+
+      <br>
+    </div>
+
+
+    <!-- EDIT CUSTOMER -->
+    <div id="Edit Customer" class="w3-container tabname w3-animate-opacity">
+      <h2>Edit Customer</h2>
+
+      <form action="/" method="post" autocomplete="off">
+
+        <br><label>Select Customer</label>
+        <select class="w3-select" name="customer_id">
+          <option value="" disabled selected>--</option>
+          <option value="1">Option 1</option>
+          <option value="2">Option 2</option>
+          <option value="3">Option 3</option>
+        </select><br>
+
+        <br><label>First Name</label>
+        <input class="w3-input" type="text" name="first_name" required
+               maxlength="30">
+
+        <br><label>Last Name</label>
+        <input class="w3-input" type="text" name="last_name" required
+               maxlength="30">
+
+        <br><label>Email</label>
+        <input class="w3-input" type="email" name="email"
+               maxlength="50">
+
+        <br><label>Phone</label>
+        <input class="w3-input" type="tel" name="phone"
+               onkeypress="return isNumberKey(event)" maxlength="11">
+
+        <br><label>Zip Code</label>
+        <input class="w3-input" type="tel" name="zip_code"
+               onkeypress="return isNumberKey(event)" maxlength="5">
+
+        <br>
+        <input class="w3-button w3-theme" type="submit"
+               name="edit_customer_submit" value="Edit Customer">
+
+      </form>
+
+      <br>
+    </div>
+
+
+    <!-- DELETE CUSTOMER -->
+    <div id="Delete Customer" class="w3-container tabname w3-animate-opacity">
+      <h2>Delete Customer</h2>
+
+      <form action="/" method="post" autocomplete="off">
+
+        <br><label>Select Customer</label>
+        <select class="w3-select" name="customer_id">
+          <option value="" disabled selected>--</option>
+          <option value="1">Option 1</option>
+          <option value="2">Option 2</option>
+          <option value="3">Option 3</option>
+        </select><br>
+
+        <br>
+        <input class="w3-button w3-theme" type="submit"
+               name="delete_customer_submit" value="Delete Customer">
+
+      </form>
+
+      <br>
+    </div>
+
+
+    <!-- VIEW ALL -->
+    <div id="View All" class="w3-container tabname w3-animate-opacity">
+      <h2>Customer Information</h2>
+
+      <table class="w3-table w3-bordered">
+        <tr>
+          <th>ID</th>
+          <th>First</th>
+          <th>Last</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Zip Code</th>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>Jill</td>
+          <td>Smith</td>
+          <td>jillsmith@gmail.com</td>
+          <td>3092488694</td>
+          <td>59584</td>
+        </tr>
+      </table>
+
+    </div>
 
 {% endblock %}
