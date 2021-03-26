@@ -21,4 +21,4 @@ and managers.
 
 ### Database:
 
-The app uses a MySQL database hosted on Google Cloud Platform.
+The app uses a MySQL database hosted externally. You will need to specify the connection information as a JSON file (see database.py).
