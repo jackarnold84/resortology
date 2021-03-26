@@ -115,14 +115,14 @@
     <div id="Delete Customer" class="w3-container tabname w3-animate-opacity">
       <h2>Delete Customer</h2>
 
-      <form action="/" method="post" autocomplete="off">
+      <form action="/customers/delete_customer" method="post" autocomplete="off">
 
         <br><label>Select Customer</label>
         <select class="w3-select" name="customer_id">
           <option value="" disabled selected>--</option>
-          <option value="1">Option 1</option>
-          <option value="2">Option 2</option>
-          <option value="3">Option 3</option>
+          {% for id,c in customer_list %}
+            <option value="{{ id }}">{{ c }}</option>
+          {% endfor %}
         </select><br>
 
         <br>
@@ -148,15 +148,15 @@
           <th>Phone</th>
           <th>Zip Code</th>
         </tr>
-        {% for c in customer_list %}
-        <tr>
-          <td>{{ c[0] }}</td>
-          <td>{{ c[1] }}</td>
-          <td>{{ c[2] }}</td>
-          <td>{{ c[3] }}</td>
-          <td>{{ c[4] }}</td>
-          <td>{{ c[5] }}</td>
-        </tr>
+        {% for c in customer_table %}
+          <tr>
+            <td>{{ c[0] }}</td>
+            <td>{{ c[1] }}</td>
+            <td>{{ c[2] }}</td>
+            <td>{{ c[3] }}</td>
+            <td>{{ c[4] }}</td>
+            <td>{{ c[5] }}</td>
+          </tr>
         {% endfor %}
       </table>
 

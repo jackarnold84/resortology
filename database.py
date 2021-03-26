@@ -5,8 +5,28 @@ import json
 connect_file_path = "C:/Users/jacka/Desktop/Dump/db_connect_info.json"
 
 build_file_path = "sql/build_tables.sql"
+example_instance_path = "sql/example_instance.sql"
 
 cnx = None
+
+
+
+# HELPER FUNCTIONS
+
+def source_file(path):
+    f = open(path, 'r')
+    sql_file = f.read()
+    f.close()
+    sql_commands = sql_file.split(';')
+
+    cursor = cnx.cursor()
+    for command in sql_commands:
+        if command.strip() != '':
+            cursor.execute(command)
+
+    cursor.close()
+    cnx.commit()
+
 
 
 # INITIALIZE DB
@@ -22,57 +42,72 @@ def connect():
                                 password=conn_info['password'],
                                 host=conn_info['host'],
                                 database=conn_info['database'])
-        print("-->connected to database")
+        print("---> connected to database")
     except:
-        print("-->ERROR: could not connect to database")
+        print("---> ERROR: could not connect to database")
 
 
 # create tables from sql build file
-def build_tables(reset=False):
-    # needs fixed
+def build_tables(reset=False, example_instance=False):
 
     cursor = cnx.cursor()
     cursor.execute("SHOW TABLES")
     tables = cursor.fetchall()
     cursor.close()
-
     if (not reset and len(tables) > 0):
-        return # don't reset
+        return # don't change tables
 
-    with open(build_file_path, "r") as f:
-        query = f.read()
+    source_file(build_file_path)
+    print("---> created tables")
 
-    cursor = cnx.cursor()
-    cursor.execute(query, multi=True)
-    cnx.commit()
-    cursor.close()
-
-    print("-->table build success")
+    if example_instance:
+        source_file(example_instance_path)
+        print("---> initialized example instance")
 
 
 
 # CUSTOMERS
 
-def get_all_customers(limit=100):
-
-    query = "SELECT * FROM customers LIMIT %d" % limit
+def get_customers_table(limit=100):
+    query = "SELECT * FROM customer LIMIT %d" % limit
 
     cursor = cnx.cursor()
     cursor.execute(query)
-    customers = cursor.fetchall()
+    table = cursor.fetchall()
     cursor.close()
 
-    return customers
+    return table
+
+
+def get_customer_list():
+    query = """SELECT customer_id, first_name, last_name FROM customer"""
+
+    cursor = cnx.cursor()
+    cursor.execute(query)
+    table = cursor.fetchall()
+    cursor.close()
+
+    c_list = [(x[0], '(%d) %s %s' % (x[0], x[1], x[2])) for x in table]
+    return c_list
 
 
 def add_customer(first_name, last_name, email, phone, zip_code):
     query = """
-      INSERT INTO customers (first_name, last_name, email, phone, zip_code)
+      INSERT INTO customer (first_name, last_name, email, phone, zip_code)
       VALUES (%s, %s, %s, %s, %s);
     """
     values = (first_name, last_name, email, phone, zip_code)
 
     cursor = cnx.cursor()
     cursor.execute(query, values)
-    cnx.commit()
     cursor.close()
+    cnx.commit()
+
+
+def delete_customer(id):
+    query = "DELETE FROM customer WHERE customer_id = %s" % (str(id))
+
+    cursor = cnx.cursor()
+    cursor.execute(query)
+    cursor.close()
+    cnx.commit()

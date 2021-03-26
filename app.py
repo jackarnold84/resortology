@@ -16,10 +16,10 @@ def root():
 # CUSTOMER PAGES
 @app.route("/customers")
 def customers():
-
-    customer_list = db.get_all_customers()
-
-    return render_template("customers.html", customer_list=customer_list)
+    customer_table = db.get_customers_table()
+    customer_list = db.get_customer_list()
+    return render_template("customers.html", customer_table=customer_table,
+                           customer_list=customer_list)
 
 
 @app.route("/customers/add_customer", methods=['POST', 'GET'])
@@ -28,8 +28,17 @@ def add_customer():
         form = request.form
         db.add_customer(form['first_name'], form['last_name'],
                         form['email'], form['phone'], form['zip_code'])
+        return customers()
+    else:
+        abort(400)
 
-        return 'added'
+
+@app.route("/customers/delete_customer", methods=['POST', 'GET'])
+def delete_customer():
+    if request.method == 'POST':
+        id = request.form['customer_id']
+        db.delete_customer(id)
+        return customers()
     else:
         abort(400)
 
@@ -38,6 +47,6 @@ def add_customer():
 if __name__ == "__main__":
 
     db.connect()
-    db.build_tables(reset=True)
+    db.build_tables(reset=False, example_instance=False)
 
     app.run(debug=True, host="127.0.0.1", port=5000)
