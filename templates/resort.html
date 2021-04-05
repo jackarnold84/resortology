@@ -1,0 +1,248 @@
+{% extends "layout.html" %}
+{% block page_title %}Manage Resort{% endblock %}
+{% block body %}
+    {{ super() }}
+
+    <p>
+      Here, you can manage rooms, room types, and fees available in
+      your resort.
+    </p>
+
+    <!-- TAB MANAGEMENT -->
+    <br>
+    <div class="w3-border">
+    <div class="w3-bar w3-white w3-border">
+      <button id="view" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'View Rooms')">
+        View Rooms
+      </button>
+      <button id="add_room" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Add Room')">
+        Add Room
+      </button>
+      <button id="delete_room" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Delete Room')">
+        Delete Room
+      </button>
+      <button id="add_type" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Add Room Type')">
+        Create Room Type
+      </button>
+      <button id="delete_type" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Delete Room Type')">
+        Delete Room Type
+      </button>
+      <button id="add_fee" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Add Fee')">
+        Create Fee
+      </button>
+      <button id="delete_fee" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Delete Fee')">
+        Delete Fee
+      </button>
+    </div>
+
+
+    <!-- VIEW ROOMS -->
+    <div id="View Rooms" class="w3-container tabname w3-animate-opacity">
+      <h2>View Rooms</h2>
+      <p>Hover over room numbers to see details.</p>
+      <br>
+
+      {% for f in floors %}
+        <h4>Floor {{ f }}</h4>
+        <div class="w3-border">
+          {% for r in room_table[f] %}
+            <div class="w3-dropdown-hover">
+              {% if r[1] == 1 %}
+                <button class="w3-button w3-white">{{ r[0] }}</button>
+                <div class="w3-dropdown-content w3-bar-block w3-border">
+                  <div class="w3-container">
+                    <p>
+                      {{ r[2] }}<br>
+                      Capacity: {{ r[3] }}
+                    </p>
+                    <p>
+                      <em>Unoccupied</em>
+                    </p>
+                  </div>
+                </div>
+              {% else %}
+                <button class="w3-button w3-grey">{{ r[0] }}</button>
+                <div class="w3-dropdown-content w3-bar-block w3-border">
+                  <div class="w3-container">
+                    {{ r[2] }}<br>
+                    Capacity: {{ r[3] }}<br>
+                    <em>Occupied</em>
+                  </div>
+                </div>
+              {% endif %}
+
+              </div>
+            {% endfor %}
+          </div>
+        <br>
+      {% endfor %}
+
+      <br>
+    </div>
+
+
+    <!-- ADD ROOM -->
+    <div id="Add Room" class="w3-container tabname w3-animate-opacity">
+      <h2>Add Room</h2>
+
+      <form action="/resort/add_room" method="post" autocomplete="off">
+
+        <br><label>Room Number</label>
+        <input class="w3-input" type="number" name="room_number" required
+               min="0" max="999999">
+
+        <br><label>Floor</label>
+        <input class="w3-input" type="number" name="floor" required
+              min="0" max="999999">
+
+        <br><label>Room Type</label>
+        <select class="w3-select" name="room_type" required>
+          <option value="" disabled selected>--</option>
+          {% for id,v in type_list %}
+            <option value="{{ id }}">{{ v }}</option>
+          {% endfor %}
+        </select><br>
+
+        <br>
+        <input class="w3-button w3-theme" type="submit"
+               name="submit" value="Add Room">
+
+      </form>
+      <br>
+    </div>
+
+
+    <!-- DELETE ROOM -->
+    <div id="Delete Room" class="w3-container tabname w3-animate-opacity">
+      <h2>Delete Room</h2>
+
+      <form action="/resort/delete_room" method="post" autocomplete="off">
+
+        <br><label>Room Number</label>
+        <select class="w3-select" name="room_number" required>
+          <option value="" disabled selected>--</option>
+          {% for id,v in room_list %}
+            <option value="{{ id }}">{{ v }}</option>
+          {% endfor %}
+        </select><br>
+
+        <br>
+        <input class="w3-button w3-theme" type="submit"
+               name="submit" value="Delete Room">
+
+      </form>
+
+      <br>
+    </div>
+
+
+    <!-- ADD ROOM TYPE -->
+    <div id="Add Room Type" class="w3-container tabname w3-animate-opacity">
+      <h2>Add Room Type</h2>
+
+      <form action="/resort/add_room_type" method="post" autocomplete="off">
+
+        <br><label>Name</label>
+        <input class="w3-input" type="text" name="name" required
+               maxlength="50">
+
+        <br><label>Room Capacity</label>
+        <input class="w3-input" type="number" name="capacity" required
+               min="1" max="99">
+
+        <br><label>Price Per Night</label>
+        <input class="w3-input" type="number" name="price" required
+               min="0" max="999999999" step="0.01">
+
+        <br>
+        <input class="w3-button w3-theme" type="submit"
+               name="submit" value="Add Room Type">
+
+      </form>
+      <br>
+    </div>
+
+
+    <!-- DELETE ROOM TYPE -->
+    <div id="Delete Room Type" class="w3-container tabname w3-animate-opacity">
+      <h2>Delete Room Type</h2>
+
+      <form action="/resort/delete_room_type" method="post" autocomplete="off">
+
+        <br><label>Room Type</label>
+        <select class="w3-select" name="room_type" required>
+          <option value="" disabled selected>--</option>
+          {% for id,v in type_list %}
+            <option value="{{ id }}">{{ v }}</option>
+          {% endfor %}
+        </select><br>
+
+        <br>
+        <input class="w3-button w3-theme" type="submit"
+               name="submit" value="Delete Room Type">
+
+      </form>
+      <br>
+    </div>
+
+
+    <!-- ADD FEE -->
+    <div id="Add Fee" class="w3-container tabname w3-animate-opacity">
+      <h2>Add Fee</h2>
+
+      <form action="/resort/add_fee" method="post" autocomplete="off">
+
+        <br><label>Name</label>
+        <input class="w3-input" type="text" name="name" required
+               maxlength="50">
+
+        <br><label>Charge Amount</label>
+        <input class="w3-input" type="number" name="price" required
+               min="0" max="999999999" step="0.01">
+
+        <br>
+        <input class="w3-button w3-theme" type="submit"
+               name="submit" value="Add Fee">
+
+      </form>
+      <br>
+    </div>
+
+
+    <!-- DELETE FEE -->
+    <div id="Delete Fee" class="w3-container tabname w3-animate-opacity">
+      <h2>Delete Fee</h2>
+
+      <form action="/resort/delete_fee" method="post" autocomplete="off">
+
+        <br><label>Fee</label>
+        <select class="w3-select" name="fee" required>
+          <option value="" disabled selected>--</option>
+          {% for id,v in fee_list %}
+            <option value="{{ id }}">{{ v }}</option>
+          {% endfor %}
+        </select><br>
+
+        <br>
+        <input class="w3-button w3-theme" type="submit"
+               name="submit" value="Delete Fee">
+
+      </form>
+
+      <br>
+    </div>
+
+
+    <!-- OPEN SPECIFIED TAB -->
+    <script>
+      document.getElementById( "{{ tab }}" ).click();
+    </script>
+
+{% endblock %}

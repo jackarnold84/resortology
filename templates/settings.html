@@ -1,0 +1,90 @@
+{% extends "layout.html" %}
+{% block page_title %}Settings{% endblock %}
+{% block body %}
+    {{ super() }}
+
+    <p>
+      Administrator settings for the application.
+    </p>
+
+    <!-- TAB MANAGEMENT -->
+    <br>
+    <div class="w3-border">
+    <div class="w3-bar w3-white w3-border">
+      <button id="clear" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Reset')">
+        Reset
+      </button>
+      <button id="date" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Date')">
+        Date
+      </button>
+      <button id="help" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Help Guide')">
+        Help Guide
+      </button>
+    </div>
+
+
+    <!-- RESET -->
+    <div id="Reset" class="w3-container tabname w3-animate-opacity">
+      <h2>Clear Data</h2>
+
+      <p>Click below to clear data. Actions are permanent!</p>
+
+      <br>
+      <form action="/settings/admin" method="post"
+            onsubmit="return confirm('Confirm: clear all data?');">
+        <input type="hidden" name="command" value="clear_all">
+        <input class="w3-button w3-theme" type="submit" name="submit"
+         value="Clear all data">
+      </form>
+
+      <br>
+      <form action="/settings/admin" method="post"
+            onsubmit="return confirm('Confirm: clear all data?');">
+        <input type="hidden" name="command" value="clear_example">
+        <input class="w3-button w3-theme" type="submit" name="submit"
+         value="Clear and fill example data">
+      </form>
+
+      <br>
+    </div>
+
+
+    <!-- CHANGE DATE -->
+    <div id="Date" class="w3-container tabname w3-animate-opacity">
+      <h2>Date</h2>
+
+      <p>Adjust the current date.</p><br>
+
+      <p><b>Current Date: </b> {{ date }}</p>
+
+      <form action="/settings/admin" method="post">
+        <input type="hidden" name="command" value="change_date">
+        <input class="w3-input" type="date" name="date" required
+         value={{ date }}><br>
+        <input class="w3-button w3-theme" type="submit" name="submit"
+         value="Change Date">
+      </form>
+
+      <br>
+    </div>
+
+
+    <div id="Help Guide" class="w3-container tabname w3-animate-opacity">
+      <h2>Help Guide</h2>
+
+      <p>Coming soon...</p>
+
+      <br>
+    </div>
+
+
+
+    <!-- OPEN SPECIFIED TAB -->
+    <script>
+      document.getElementById( "{{ tab }}" ).click();
+    </script>
+
+{% endblock %}

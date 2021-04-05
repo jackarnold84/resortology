@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+{% block page_title %}Manage Bookings{% endblock %}
+{% block body %}
+    {{ super() }}
+
+    <p>
+      Here, you can view, edit, cancel, and create bookings and look at past
+      bookings for your resort.
+    </p>
+
+    <br>
+    <button class="w3-button w3-theme" onclick="history.back()">
+      < Back
+    </button>
+    <br><br>
+
+    <!-- MANAGE FEES FORM -->
+    <div id="Manage Fees" class="w3-container w3-animate-opacity">
+      <h2>Manage Fees</h2>
+
+      <form action="/bookings/fees" method="post"
+            autocomplete="off">
+
+        <h4>{{ b_info[1] }} (Room: {{ b_info[2] }})</h4>
+
+        <br><p>Select a quantity for each fee:</p>
+
+        <input type="hidden" name="booking_id" value="{{ b_info[0] }}">
+
+        {% for f in fees %}
+
+          <br>{{ f[1] }}
+          <input class="w3-input" type="number" name="{{ f[0] }}"
+                 min="0" max="99999" value="{{ f[2] }}">
+
+        {% endfor %}
+
+        <br>
+        <input class="w3-button w3-theme" type="submit" name="submit"
+         value="Update">
+
+      </form>
+
+      <br>
+    </div>
+
+{% endblock %}

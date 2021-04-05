@@ -12,19 +12,19 @@
     <br>
     <div class="w3-border">
     <div class="w3-bar w3-white w3-border">
-      <button class="w3-bar-item w3-button testbtn w3-padding-16"
+      <button id="add" class="w3-bar-item w3-button testbtn w3-padding-16"
               onclick="openTab(event,'Add Customer')">
         Add Customer
       </button>
-      <button class="w3-bar-item w3-button testbtn w3-padding-16"
+      <button id="edit" class="w3-bar-item w3-button testbtn w3-padding-16"
               onclick="openTab(event,'Edit Customer')">
         Edit Customer
       </button>
-      <button class="w3-bar-item w3-button testbtn w3-padding-16"
+      <button id="delete" class="w3-bar-item w3-button testbtn w3-padding-16"
               onclick="openTab(event,'Delete Customer')">
         Delete Customer
       </button>
-      <button class="w3-bar-item w3-button testbtn w3-padding-16"
+      <button id="view" class="w3-bar-item w3-button testbtn w3-padding-16"
               onclick="openTab(event,'View All')">
         View All
       </button>
@@ -59,7 +59,7 @@
 
         <br>
         <input class="w3-button w3-theme" type="submit"
-               name="add_customer_submit" value="Add Customer">
+               name="submit" value="Add Customer">
 
       </form>
 
@@ -71,39 +71,19 @@
     <div id="Edit Customer" class="w3-container tabname w3-animate-opacity">
       <h2>Edit Customer</h2>
 
-      <form action="/" method="post" autocomplete="off">
+      <form action="/customers/edit_customer" method="post" autocomplete="off">
 
         <br><label>Select Customer</label>
-        <select class="w3-select" name="customer_id">
+        <select class="w3-select" name="customer_id" required>
           <option value="" disabled selected>--</option>
-          <option value="1">Option 1</option>
-          <option value="2">Option 2</option>
-          <option value="3">Option 3</option>
+          {% for id,c in customer_list %}
+            <option value="{{ id }}">{{ c }}</option>
+          {% endfor %}
         </select><br>
-
-        <br><label>First Name</label>
-        <input class="w3-input" type="text" name="first_name" required
-               maxlength="30">
-
-        <br><label>Last Name</label>
-        <input class="w3-input" type="text" name="last_name" required
-               maxlength="30">
-
-        <br><label>Email</label>
-        <input class="w3-input" type="email" name="email"
-               maxlength="50">
-
-        <br><label>Phone</label>
-        <input class="w3-input" type="tel" name="phone"
-               onkeypress="return isNumberKey(event)" maxlength="11">
-
-        <br><label>Zip Code</label>
-        <input class="w3-input" type="tel" name="zip_code"
-               onkeypress="return isNumberKey(event)" maxlength="5">
 
         <br>
         <input class="w3-button w3-theme" type="submit"
-               name="edit_customer_submit" value="Edit Customer">
+               name="submit" value="Edit Customer">
 
       </form>
 
@@ -118,7 +98,7 @@
       <form action="/customers/delete_customer" method="post" autocomplete="off">
 
         <br><label>Select Customer</label>
-        <select class="w3-select" name="customer_id">
+        <select class="w3-select" name="customer_id" required>
           <option value="" disabled selected>--</option>
           {% for id,c in customer_list %}
             <option value="{{ id }}">{{ c }}</option>
@@ -127,7 +107,7 @@
 
         <br>
         <input class="w3-button w3-theme" type="submit"
-               name="delete_customer_submit" value="Delete Customer">
+               name="submit" value="Delete Customer">
 
       </form>
 
@@ -159,7 +139,12 @@
           </tr>
         {% endfor %}
       </table>
-
     </div>
+
+
+    <!-- OPEN SPECIFIED TAB -->
+    <script>
+      document.getElementById( "{{ tab }}" ).click();
+    </script>
 
 {% endblock %}

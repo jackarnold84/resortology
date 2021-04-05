@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% block page_title %}Manage Customers{% endblock %}
+{% block body %}
+    {{ super() }}
+
+    <p>
+      Here, you can manage customers and customer information for your
+      resort.
+    </p>
+
+    <br>
+    <button class="w3-button w3-theme" onclick="history.back()">
+      < Back
+    </button>
+    <br><br>
+
+    <!-- EDIT CUSTOMER FORM -->
+    <div id="Edit Customer" class="w3-container w3-animate-opacity">
+      <h2>Edit Customer</h2>
+
+      <form action="/customers/edit_customer/edit" method="post"
+            autocomplete="off">
+
+        <h4>({{ c_info[0] }}) {{ c_info[1] }} {{ c_info[2] }}</h4>
+
+        <input type="hidden" name="customer_id" value="{{ c_info[0] }}">
+
+        <br><label>First Name</label>
+        <input class="w3-input" type="text" name="first_name" required
+               maxlength="30" value="{{ c_info[1] }}">
+
+        <br><label>Last Name</label>
+        <input class="w3-input" type="text" name="last_name" required
+               maxlength="30" value="{{ c_info[2] }}">
+
+        <br><label>Email</label>
+        <input class="w3-input" type="email" name="email"
+               maxlength="50" value="{{ c_info[3] }}">
+
+        <br><label>Phone</label>
+        <input class="w3-input" type="tel" name="phone"
+               onkeypress="return isNumberKey(event)" maxlength="11"
+               value="{{ c_info[4] }}">
+
+        <br><label>Zip Code</label>
+        <input class="w3-input" type="tel" name="zip_code"
+               onkeypress="return isNumberKey(event)" maxlength="5"
+                value="{{ c_info[5] }}">
+
+        <br>
+        <input class="w3-button w3-theme" type="submit"
+               name="edit_customer_submit" value="Edit Customer">
+
+      </form>
+
+      <br>
+    </div>
+
+{% endblock %}

@@ -14,9 +14,6 @@ function openTab(evt, tabName) {
   evt.currentTarget.className += " w3-theme-dark";
 }
 
-var mybtn = document.getElementsByClassName("testbtn")[0];
-mybtn.click();
-
 
 // require numbers
 function isNumberKey(evt){

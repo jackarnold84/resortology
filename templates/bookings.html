@@ -1,0 +1,162 @@
+{% extends "layout.html" %}
+{% block page_title %}Manage Bookings{% endblock %}
+{% block body %}
+    {{ super() }}
+
+    <p>
+      Here, you can view, edit, cancel, and create bookings and look at past
+      bookings for your resort.
+    </p>
+
+    <!-- TAB MANAGEMENT -->
+    <br>
+    <div class="w3-border">
+    <div class="w3-bar w3-white w3-border">
+      <button id="current" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Current Bookings')">
+        Current Bookings
+      </button>
+      <button id="past" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Past Bookings')">
+        Past Bookings
+      </button>
+      <button id="add" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Add Booking')">
+        Add Booking
+      </button>
+    </div>
+
+
+    <!-- CURRENT BOOKINGS -->
+    <div id="Current Bookings" class="w3-container tabname w3-animate-opacity">
+      <h2>Current Bookings</h2>
+
+      <h4>Active</h4>
+      <table class="w3-table w3-bordered">
+        <tr>
+          <th>Customer</th>
+          <th>Arrival</th>
+          <th>Nights</th>
+          <th>Room Number</th>
+          <th>&nbsp</th>
+          <th>&nbsp</th>
+        </tr>
+        {% for x in active_bookings %}
+          <tr>
+            <td>{{ x[1] }}</td>
+            <td>{{ x[2] }}</td>
+            <td>{{ x[3] }}</td>
+            <td>{{ x[4] }}</td>
+            <td>
+              <form action="/bookings/fees" method="post">
+                <input type="hidden" name="booking_id" value="{{ x[0] }}">
+                <input class="w3-button w3-theme" type="submit" name="submit"
+                 value="Manage Fees" style="padding:0px 5px 0px 5px">
+              </form>
+            </td>
+            <td>
+              <form action="/bookings/delete_booking" method="post">
+                <input type="hidden" name="booking_id" value="{{ x[0] }}">
+                <input class="w3-button w3-theme" type="submit" name="submit"
+                 value="Cancel" style="padding:0px 5px 0px 5px">
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      <br>
+      <h4>Upcoming</h4>
+      <table class="w3-table w3-bordered">
+        <tr>
+          <th>Customer</th>
+          <th>Arrival</th>
+          <th>Nights</th>
+          <th>Room Number</th>
+          <th>&nbsp</th>
+          <th>&nbsp</th>
+        </tr>
+        {% for x in upcoming_bookings %}
+          <tr>
+            <td>{{ x[1] }}</td>
+            <td>{{ x[2] }}</td>
+            <td>{{ x[3] }}</td>
+            <td>{{ x[4] }}</td>
+            <td>
+              <form action="/bookings/fees" method="post">
+                <input type="hidden" name="booking_id" value="{{ x[0] }}">
+                <input class="w3-button w3-theme" type="submit" name="submit"
+                 value="Manage Fees" style="padding:0px 5px 0px 5px">
+              </form>
+            </td>
+            <td>
+              <form action="/bookings/delete_booking" method="post">
+                <input type="hidden" name="booking_id" value="{{ x[0] }}">
+                <input class="w3-button w3-theme" type="submit" name="submit"
+                 value="Cancel" style="padding:0px 5px 0px 5px">
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      <br>
+    </div>
+
+
+    <!-- PAST BOOKINGS -->
+    <div id="Past Bookings" class="w3-container tabname w3-animate-opacity">
+      <h2>Past Bookings</h2>
+
+      <table class="w3-table w3-bordered">
+        <tr>
+          <th>Customer</th>
+          <th>Arrival</th>
+          <th>Nights</th>
+          <th>Room Number</th>
+        </tr>
+        {% for x in past_bookings %}
+          <tr>
+            <td>{{ x[1] }}</td>
+            <td>{{ x[2] }}</td>
+            <td>{{ x[3] }}</td>
+            <td>{{ x[4] }}</td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      <br>
+    </div>
+
+
+    <!-- ADD BOOKINGS -->
+    <div id="Add Booking" class="w3-container tabname w3-animate-opacity">
+      <h2>Add Booking</h2>
+
+        <form action="/bookings/add_booking" method="post" autocomplete="off">
+
+          <br><label>Select Customer</label>
+          <select class="w3-select" name="customer_id" required>
+            <option value="" disabled selected>--</option>
+            {% for id,c in customer_list %}
+              <option value="{{ id }}">{{ c }}</option>
+            {% endfor %}
+          </select><br>
+
+          <br>
+          <input class="w3-button w3-theme" type="submit"
+                 name="submit" value="Next">
+
+        </form>
+
+      <br>
+    </div>
+
+
+
+    <!-- OPEN SPECIFIED TAB -->
+    <script>
+      document.getElementById( "{{ tab }}" ).click();
+    </script>
+
+{% endblock %}

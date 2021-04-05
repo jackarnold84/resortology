@@ -1,0 +1,132 @@
+{% extends "layout.html" %}
+{% block page_title %}Manage Invoices{% endblock %}
+{% block body %}
+    {{ super() }}
+
+    <p>
+      Here, you can view invoices and mark them as paid or unpaid. Go to the
+      analytics tab to calculate revenue.
+    </p>
+
+    <!-- TAB MANAGEMENT -->
+    <br>
+    <div class="w3-border">
+    <div class="w3-bar w3-white w3-border">
+      <button id="unpaid" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Unpaid Invoices')">
+        Unpaid Invoices
+      </button>
+      <button id="paid" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Paid Invoices')">
+        Paid Invoices
+      </button>
+    </div>
+
+
+    <!-- UNPAID INVOICES -->
+    <div id="Unpaid Invoices" class="w3-container tabname w3-animate-opacity">
+      <h2>Unpaid Invoices</h2>
+
+      <h4>Current</h4>
+      <table class="w3-table w3-bordered">
+        <tr>
+          <th>Invoice ID</th>
+          <th>Customer</th>
+          <th>Room Number</th>
+          <th>Amount</th>
+          <th>Due Date</th>
+          <th>&nbsp</th>
+        </tr>
+        {% for x in current_invoices %}
+          <tr>
+            <td>{{ x[1] }}</td>
+            <td>{{ x[2] }}</td>
+            <td>{{ x[3] }}</td>
+            <td>{{ x[4] }}</td>
+            <td>{{ x[5] }}</td>
+            <td>
+              <form action="/invoices/pay" method="post">
+                <input type="hidden" name="booking_id" value="{{ x[0] }}">
+                <input class="w3-button w3-theme" type="submit" name="submit"
+                 value="Mark As Paid" style="padding:0px 5px 0px 5px">
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      <br>
+      <h4>Overdue</h4>
+      <table class="w3-table w3-bordered">
+        <tr>
+          <th>Invoice ID</th>
+          <th>Customer</th>
+          <th>Room Number</th>
+          <th>Amount</th>
+          <th>Due Date</th>
+          <th>&nbsp</th>
+        </tr>
+        {% for x in overdue_invoices %}
+          <tr>
+            <td>{{ x[1] }}</td>
+            <td>{{ x[2] }}</td>
+            <td>{{ x[3] }}</td>
+            <td>{{ x[4] }}</td>
+            <td>{{ x[5] }}</td>
+            <td>
+              <form action="/invoices/pay" method="post">
+                <input type="hidden" name="booking_id" value="{{ x[0] }}">
+                <input class="w3-button w3-theme" type="submit" name="submit"
+                 value="Mark As Paid" style="padding:0px 5px 0px 5px">
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      <br>
+    </div>
+
+
+    <!-- PAID INVOICES -->
+    <div id="Paid Invoices" class="w3-container tabname w3-animate-opacity">
+      <h2>Paid Invoices</h2>
+
+      <table class="w3-table w3-bordered">
+        <tr>
+          <th>Invoice ID</th>
+          <th>Customer</th>
+          <th>Room Number</th>
+          <th>Amount</th>
+          <th>Due Date</th>
+          <th>&nbsp</th>
+        </tr>
+        {% for x in paid_invoices %}
+          <tr>
+            <td>{{ x[1] }}</td>
+            <td>{{ x[2] }}</td>
+            <td>{{ x[3] }}</td>
+            <td>{{ x[4] }}</td>
+            <td>{{ x[5] }}</td>
+            <td>
+              <form action="/invoices/unpay" method="post">
+                <input type="hidden" name="booking_id" value="{{ x[0] }}">
+                <input class="w3-button w3-theme" type="submit" name="submit"
+                 value="Mark As Unpaid" style="padding:0px 5px 0px 5px">
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      <br>
+    </div>
+
+
+
+    <!-- OPEN SPECIFIED TAB -->
+    <script>
+      document.getElementById( "{{ tab }}" ).click();
+    </script>
+
+{% endblock %}
