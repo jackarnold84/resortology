@@ -138,8 +138,10 @@
           <br><label>Select Customer</label>
           <select class="w3-select" name="customer_id" required>
             <option value="" disabled selected>--</option>
-            {% for id,c in customer_list %}
-              <option value="{{ id }}">{{ c }}</option>
+            {% for c in customer_table %}
+              <option value="{{ c.customer_id }}">
+                ({{ c.customer_id }}) {{ c.first_name }} {{ c.last_name }}
+              </option>
             {% endfor %}
           </select><br>
 

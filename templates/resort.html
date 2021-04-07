@@ -105,8 +105,8 @@
         <br><label>Room Type</label>
         <select class="w3-select" name="room_type" required>
           <option value="" disabled selected>--</option>
-          {% for id,v in type_list %}
-            <option value="{{ id }}">{{ v }}</option>
+          {% for t in type_list %}
+            <option value="{{ t.room_type_id }}">{{ t.name }}</option>
           {% endfor %}
         </select><br>
 
@@ -128,8 +128,8 @@
         <br><label>Room Number</label>
         <select class="w3-select" name="room_number" required>
           <option value="" disabled selected>--</option>
-          {% for id,v in room_list %}
-            <option value="{{ id }}">{{ v }}</option>
+          {% for r in room_list %}
+            <option value="{{ r.room_number }}">{{ r.room_number }}</option>
           {% endfor %}
         </select><br>
 
@@ -179,8 +179,8 @@
         <br><label>Room Type</label>
         <select class="w3-select" name="room_type" required>
           <option value="" disabled selected>--</option>
-          {% for id,v in type_list %}
-            <option value="{{ id }}">{{ v }}</option>
+          {% for t in type_list %}
+            <option value="{{ t.room_type_id }}">{{ t.name }}</option>
           {% endfor %}
         </select><br>
 
@@ -225,8 +225,8 @@
         <br><label>Fee</label>
         <select class="w3-select" name="fee" required>
           <option value="" disabled selected>--</option>
-          {% for id,v in fee_list %}
-            <option value="{{ id }}">{{ v }}</option>
+          {% for f in fee_list %}
+            <option value="{{ f.fee_id }}">{{ f.name }}</option>
           {% endfor %}
         </select><br>
 

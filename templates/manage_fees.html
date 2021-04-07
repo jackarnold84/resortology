@@ -21,17 +21,17 @@
       <form action="/bookings/fees" method="post"
             autocomplete="off">
 
-        <h4>{{ b_info[1] }} (Room: {{ b_info[2] }})</h4>
+        <h4>{{ b.first_name }} {{ b.last_name }} (Room: {{ b.room_number }})</h4>
 
         <br><p>Select a quantity for each fee:</p>
 
-        <input type="hidden" name="booking_id" value="{{ b_info[0] }}">
+        <input type="hidden" name="booking_id" value="{{ b.booking_id }}">
 
-        {% for f in fees %}
+        {% for id,name,quantity in fees %}
 
-          <br>{{ f[1] }}
-          <input class="w3-input" type="number" name="{{ f[0] }}"
-                 min="0" max="99999" value="{{ f[2] }}">
+          <br>{{ name }}
+          <input class="w3-input" type="number" name="{{ id }}"
+                 min="0" max="99999" value="{{ quantity }}">
 
         {% endfor %}
 

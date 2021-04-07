@@ -21,16 +21,16 @@
       <form action="/bookings/add_booking" method="post"
             autocomplete="off">
 
-        <h4>({{ c_info[0] }}) {{ c_info[1] }} {{ c_info[2] }}</h4>
+        <h4>({{ c.customer_id }}) {{ c.first_name }} {{ c.last_name }}</h4>
 
-        <input type="hidden" name="customer_id" value="{{ c_info[0] }}">
+        <input type="hidden" name="customer_id" value="{{ c.customer_id }}">
 
         <br><label>Select Room</label>
         <select class="w3-select" name="room_number" required>
           <option value="" disabled selected>--</option>
-          {% for r in room_table %}
-            <option value="{{ r[0] }}">
-              {{ r[0] }} - {{ r[3] }} ({{ r[4]}} person)
+          {% for number,x,y,type,capacity in room_table %}
+            <option value="{{ number }}">
+              {{ number }} - {{ type }} ({{ capacity }} person)
             </option>
           {% endfor %}
         </select><br>

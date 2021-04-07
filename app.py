@@ -27,10 +27,8 @@ def root():
 @app.route("/customers")
 def customers(tab="add"):
     customer_table = db.get_customers_table()
-    customer_list = db.get_customer_list()
     return render_template("customers.html", tab=tab,
-                           customer_table=customer_table,
-                           customer_list=customer_list)
+                           customer_table=customer_table)
 
 
 @app.route("/customers/add_customer", methods=['POST', 'GET'])
@@ -62,7 +60,7 @@ def edit_customer():
         if (c_info is None):
             abort(404)
         else:
-            return render_template("edit_customer.html", c_info=c_info)
+            return render_template("edit_customer.html", c=c_info)
     else:
         return customers("edit")
 
@@ -165,8 +163,9 @@ def bookings(tab="current"):
     active_bookings = db.get_active_bookings()
     past_bookings = db.get_past_bookings()
     upcoming_bookings = db.get_upcoming_bookings()
-    customer_list = db.get_customer_list()
-    return render_template("bookings.html", tab=tab, customer_list=customer_list,
+    customer_table = db.get_customers_table()
+    return render_template("bookings.html", tab=tab,
+                           customer_table=customer_table,
                            active_bookings=active_bookings,
                            past_bookings=past_bookings,
                            upcoming_bookings=upcoming_bookings)
@@ -189,7 +188,7 @@ def add_booking():
 
         c_info = db.get_customer_info(request.form['customer_id'])
         room_table = db.get_room_table(by_floor=False)
-        return render_template("add_booking.html", c_info=c_info,
+        return render_template("add_booking.html", c=c_info,
                                room_table=room_table, err_message=err)
     else:
         return bookings("add")
@@ -217,8 +216,7 @@ def manage_fees():
 
         fees = db.get_fees(booking_id)
         b_info = db.get_booking_info(booking_id)
-        return render_template("manage_fees.html", b_info=b_info,
-                               fees=fees)
+        return render_template("manage_fees.html", b=b_info, fees=fees)
     else:
         return bookings("current")
 
@@ -309,5 +307,7 @@ def admin():
 if __name__ == "__main__":
 
     db.connect()
+    db.connect_sqlalchemy()
+    print("--> database connected")
 
     app.run(debug=True, host="127.0.0.1", port=5000)

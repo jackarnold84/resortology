@@ -21,31 +21,31 @@
       <form action="/customers/edit_customer/edit" method="post"
             autocomplete="off">
 
-        <h4>({{ c_info[0] }}) {{ c_info[1] }} {{ c_info[2] }}</h4>
+        <h4>({{ c.customer_id }}) {{ c.first_name }} {{ c.last_name }}</h4>
 
-        <input type="hidden" name="customer_id" value="{{ c_info[0] }}">
+        <input type="hidden" name="customer_id" value="{{ c.customer_id }}">
 
         <br><label>First Name</label>
         <input class="w3-input" type="text" name="first_name" required
-               maxlength="30" value="{{ c_info[1] }}">
+               maxlength="30" value="{{ c.first_name }}">
 
         <br><label>Last Name</label>
         <input class="w3-input" type="text" name="last_name" required
-               maxlength="30" value="{{ c_info[2] }}">
+               maxlength="30" value="{{ c.last_name }}">
 
         <br><label>Email</label>
         <input class="w3-input" type="email" name="email"
-               maxlength="50" value="{{ c_info[3] }}">
+               maxlength="50" value="{{ c.email }}">
 
         <br><label>Phone</label>
         <input class="w3-input" type="tel" name="phone"
                onkeypress="return isNumberKey(event)" maxlength="11"
-               value="{{ c_info[4] }}">
+               value="{{ c.phone }}">
 
         <br><label>Zip Code</label>
         <input class="w3-input" type="tel" name="zip_code"
                onkeypress="return isNumberKey(event)" maxlength="5"
-                value="{{ c_info[5] }}">
+                value="{{ c.zip_code }}">
 
         <br>
         <input class="w3-button w3-theme" type="submit"
