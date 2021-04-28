@@ -26,7 +26,6 @@ def root():
 
 @app.route("/customers")
 def customers(tab="add"):
-    db.connect()
     customer_table = db.get_customers_table()
     return render_template("customers.html", tab=tab,
                            customer_table=customer_table)
@@ -57,7 +56,6 @@ def delete_customer():
 def edit_customer():
     if request.method == 'POST':
         id = request.form['customer_id']
-        db.connect()
         c_info = db.get_customer_info(id)
         if (c_info is None):
             abort(404)
@@ -88,7 +86,6 @@ def edit_customer_process():
 
 @app.route("/resort")
 def resort(tab="view"):
-    db.connect()
     db.update_available()
     room_table, floors = db.get_room_table()
     room_list = db.get_room_list()
@@ -164,7 +161,6 @@ def delete_fee():
 
 @app.route("/bookings")
 def bookings(tab="current"):
-    db.connect()
     active_bookings = db.get_active_bookings()
     past_bookings = db.get_past_bookings()
     upcoming_bookings = db.get_upcoming_bookings()
@@ -232,7 +228,6 @@ def manage_fees():
 
 @app.route("/invoices")
 def invoices(tab="unpaid"):
-    db.connect()
     current_invoices = db.get_current_invoices()
     overdue_invoices = db.get_overdue_invoices()
     paid_invoices = db.get_paid_invoices()
@@ -269,7 +264,6 @@ def invoice_unpay():
 
 @app.route("/analytics")
 def analytics(tab="bookings"):
-    db.connect()
     db.update_bookings_by_month()
     db.update_revenue_by_month()
     db.update_revenue_by_fee()
@@ -282,7 +276,6 @@ def analytics(tab="bookings"):
 
 @app.route("/analytics/refresh")
 def analytics_refresh():
-    db.connect()
     db.update_bookings_by_month()
     db.update_revenue_by_month()
     db.update_revenue_by_fee()
@@ -307,12 +300,10 @@ def admin():
 
         if command == "clear_all":
             db.build_tables(reset=True, example_instance=False)
-            db.connect()
             return settings("clear")
 
         elif command == "clear_example":
             db.build_tables(reset=True, example_instance=True)
-            db.connect()
             return settings("clear")
 
         elif command == "change_date":
