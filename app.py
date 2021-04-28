@@ -180,18 +180,14 @@ def bookings(tab="current"):
 def add_booking():
     if request.method == 'POST':
         err = ""
-        if 'room_number' in request.form:
-            form = request.form
-            db.set_transaction_isolation("REPEATABLE READ")
-            if not db.is_valid_booking(form['room_number'], form['arrival'],
-                                       form['nights']):
-                err = "Room %s is already booked during this timeframe" % (form['room_number'])
-                db.rollback_transaction()
-            else:
-                db.add_booking(form['room_number'], form['customer_id'],
-                               form['arrival'], form['nights'])
-                db.commit_transaction()
+        form = request.form
+        if 'room_number' in form:
+            added = db.add_booking(form['room_number'], form['customer_id'],
+                                   form['arrival'], form['nights'])
+            if added:
                 return bookings("add")
+            else:
+                err = "Room %s is already booked during this timeframe" % (form['room_number'])
 
         c_info = db.get_customer_info(request.form['customer_id'])
         room_table = db.get_room_table(by_floor=False)
@@ -215,14 +211,12 @@ def manage_fees():
     if request.method == 'POST':
         booking_id = request.form['booking_id']
 
-        db.set_transaction_isolation("READ COMMITTED")
         fees = db.get_fee_ids();
         if (len(list(request.form.keys())) > 2):
             for f in fees:
                 db.update_fee(booking_id, f, request.form[f])
             return bookings("current")
 
-        db.connect()
         fees = db.get_fees(booking_id)
         b_info = db.get_booking_info(booking_id)
         return render_template("manage_fees.html", b=b_info, fees=fees)
@@ -335,7 +329,10 @@ def admin():
 # connect to DB, and start the app
 if __name__ == "__main__":
 
-    db.connect()
+    cnx = db.connect()
+    if cnx is None:
+        exit(0)
+
     db.connect_sqlalchemy()
     db.setup_indexes()
     print("--> database connected")

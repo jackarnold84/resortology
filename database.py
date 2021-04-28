@@ -7,9 +7,11 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 from models import *
 import numpy as np
 import pandas as pd
+from datetime import datetime
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
-from datetime import datetime
+matplotlib.use('Agg')
 
 
 # =====================
@@ -26,7 +28,6 @@ db_uri = 'mysql+mysqlconnector://%s:%s@%s/%s' % (conn_info['user'],
 
 # connection global variables
 session = None
-cnx = None
 
 
 def connect_sqlalchemy():
@@ -44,14 +45,14 @@ def connect_sqlalchemy():
 
 def connect():
     try:
-        global cnx
         cnx = connector.connect(user=conn_info['user'],
                                 password=conn_info['password'],
                                 host=conn_info['host'],
                                 database=conn_info['database'])
+        return cnx
     except:
         print("---> ERROR: could not connect to database")
-        exit(0)
+        return None
 
 
 
@@ -65,6 +66,7 @@ def source_file(path):
     f.close()
     sql_commands = sql_file.split(';')
 
+    cnx = connect()
     cursor = cnx.cursor()
     for command in sql_commands:
         if command.strip() != '':
@@ -72,6 +74,7 @@ def source_file(path):
 
     cursor.close()
     cnx.commit()
+    cnx.close()
 
 
 # create tables from sql build file
@@ -80,12 +83,14 @@ def build_tables(reset=False, example_instance=False):
     build_file_path = "sql/build_tables.sql"
     example_instance_path = "sql/example_instance.sql"
 
+    cnx = connect()
     cursor = cnx.cursor()
     cursor.execute("SHOW TABLES")
     tables = cursor.fetchall()
     cursor.close()
     if (not reset and len(tables) > 0):
         print("---> tables already exist")
+        cnx.close()
         return # don't change tables
 
     source_file(build_file_path)
@@ -96,6 +101,8 @@ def build_tables(reset=False, example_instance=False):
         source_file(example_instance_path)
         print("---> initialized example instance")
 
+    cnx.close()
+
 
 def setup_indexes():
     idx1 = """CREATE INDEX bid_index ON booking (booking_id, arrival)
@@ -104,6 +111,7 @@ def setup_indexes():
     idx3 = """CREATE INDEX fid_index ON fee (fee_id) USING HASH"""
 
     # create if does not already exist
+    cnx = connect()
     cursor = cnx.cursor()
     try:
         cursor.execute(idx1)
@@ -119,12 +127,11 @@ def setup_indexes():
         pass
     cursor.close()
     cnx.commit()
-    connect()
+    cnx.close()
 
 
 # TRANSACTIONS
-def set_transaction_isolation(level="REPEATABLE READ"):
-    connect()
+def set_transaction_isolation(cnx, level="REPEATABLE READ"):
     if level not in ["REPEATABLE READ", "READ COMMITTED",
                      "READ UNCOMMITTED", "SERIALIZABLE"]:
         return
@@ -133,6 +140,7 @@ def set_transaction_isolation(level="REPEATABLE READ"):
     cursor = cnx.cursor()
     cursor.execute(query)
     cursor.close()
+
 
 def commit_transaction():
     cnx.commit()
@@ -195,10 +203,12 @@ def get_room_table(by_floor=True):
                ORDER BY r.room_number
             """
 
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query)
     table = cursor.fetchall()
     cursor.close()
+    cnx.close()
 
     if not by_floor:
         return table
@@ -231,39 +241,33 @@ def add_room(room_number, floor, room_type_id):
                available=1)
     session.add(new)
     session.commit()
-    connect()
 
 
 def add_room_type(name, capacity, price):
     new = RoomType(name=name, capacity=capacity, price=price)
     session.add(new)
     session.commit()
-    connect()
 
 
 def add_fee(name, price):
     new = Fee(name=name, price=price)
     session.add(new)
     session.commit()
-    connect()
 
 
 def delete_room(room_number):
     Room.query.filter_by(room_number=room_number).delete()
     session.commit()
-    connect()
 
 
 def delete_room_type(id):
     RoomType.query.filter_by(room_type_id=id).delete()
     session.commit()
-    connect()
 
 
 def delete_fee(id):
     Fee.query.filter_by(fee_id=id).delete()
     session.commit()
-    connect()
 
 
 def update_available():
@@ -280,12 +284,13 @@ def update_available():
           AND b.arrival <= CURRENT_DATE();
     """
 
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query1)
     cursor.execute(query2)
     cursor.close()
     cnx.commit()
-    connect()
+    cnx.close()
 
 
 # =====================
@@ -302,10 +307,12 @@ def get_active_bookings():
                ORDER BY arrival
             """
 
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query)
     table = cursor.fetchall()
     cursor.close()
+    cnx.close()
 
     return table
 
@@ -319,10 +326,12 @@ def get_upcoming_bookings():
                ORDER BY arrival
             """
 
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query)
     table = cursor.fetchall()
     cursor.close()
+    cnx.close()
 
     return table
 
@@ -336,15 +345,17 @@ def get_past_bookings():
                ORDER BY arrival
             """
 
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query)
     table = cursor.fetchall()
     cursor.close()
+    cnx.close()
 
     return table
 
 
-def is_valid_booking(room_number, arrival, nights):
+def is_valid_booking(cnx, room_number, arrival, nights):
     query = """SELECT COUNT(*) FROM booking
                WHERE room_number = %s AND (
                  (%s >= arrival AND %s < DATE_ADD(arrival, INTERVAL nights DAY)) OR
@@ -354,7 +365,6 @@ def is_valid_booking(room_number, arrival, nights):
                     DATE_ADD(%s, INTERVAL %s DAY) > DATE_ADD(arrival, INTERVAL nights DAY))
                )
             """
-
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query, (room_number, arrival, arrival, arrival, nights,
                            arrival, nights, arrival, arrival, nights))
@@ -365,8 +375,18 @@ def is_valid_booking(room_number, arrival, nights):
 
 
 def add_booking(room_number, customer_id, arrival, nights):
+    # transaction
+    cnx = connect()
+    set_transaction_isolation(cnx, "REPEATABLE READ")
+
+    if not is_valid_booking(cnx, room_number, arrival, nights):
+        # rollback
+        cnx.close()
+        return False
+
     query = """INSERT INTO booking (room_number, customer_id, arrival, nights)
                VALUES (%s, %s, %s, %s)"""
+
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query, (room_number, customer_id, arrival, nights))
 
@@ -375,14 +395,17 @@ def add_booking(room_number, customer_id, arrival, nights):
     table = cursor.fetchall()
     cursor.close()
 
-    setup_invoice(table[0][0])
+    setup_invoice(cnx, table[0][0])
+    # commit
+    cnx.commit()
+    cnx.close()
+    return True
 
 
 def delete_booking(id):
     Booking.query.filter_by(booking_id=id).delete()
     Invoice.query.filter_by(booking_id=id).delete()
     session.commit()
-    connect()
 
 
 def get_booking_info(id):
@@ -419,15 +442,21 @@ def get_fees(id):
     ORDER BY fee_id;
     """
 
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query, (id, id))
     table = cursor.fetchall()
     cursor.close()
+    cnx.close()
 
     return table
 
 
 def update_fee(booking_id, fee_id, quantity):
+
+    cnx = connect()
+    set_transaction_isolation(cnx, "READ COMMITTED")
+
     bf = BookingFee.query.filter_by(booking_id=booking_id, fee_id=fee_id).first()
     quantity = int(quantity)
 
@@ -440,9 +469,10 @@ def update_fee(booking_id, fee_id, quantity):
         session.add(new)
 
     session.commit()
-    connect()
 
-    update_invoice_amount(booking_id)
+    update_invoice_amount(cnx, booking_id)
+    cnx.commit()
+    cnx.close()
 
 
 
@@ -450,18 +480,18 @@ def update_fee(booking_id, fee_id, quantity):
 # INVOICES PAGES
 # =====================
 
-def setup_invoice(booking_id):
+def setup_invoice(cnx, booking_id):
     query = """INSERT INTO invoice (booking_id, amount, paid, paid_date)
                VALUES (%s, 0.0, 0, NULL)"""
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query, (booking_id, ))
     cursor.close()
 
-    update_invoice_amount(booking_id)
+    update_invoice_amount(cnx, booking_id)
 
 
 
-def update_invoice_amount(booking_id):
+def update_invoice_amount(cnx, booking_id):
     query = """
     UPDATE invoice
     SET amount = (
@@ -480,8 +510,6 @@ def update_invoice_amount(booking_id):
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query, (booking_id, booking_id))
     cursor.close()
-    cnx.commit()
-    connect()
 
 
 def mark_as_paid(booking_id):
@@ -489,7 +517,6 @@ def mark_as_paid(booking_id):
     invoice.paid = 1
     invoice.paid_date = date=datetime.today().strftime('%Y-%m-%d')
     session.commit()
-    connect()
 
 
 def mark_as_unpaid(booking_id):
@@ -497,7 +524,6 @@ def mark_as_unpaid(booking_id):
     invoice.paid = 0
     invoice.paid_date = None
     session.commit()
-    connect()
 
 
 def get_current_invoices():
@@ -512,10 +538,12 @@ def get_current_invoices():
                ORDER BY due_date;
             """
 
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query)
     table = cursor.fetchall()
     cursor.close()
+    cnx.close()
 
     return table
 
@@ -533,10 +561,12 @@ def get_overdue_invoices():
     ORDER BY due_date;
     """
 
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query)
     table = cursor.fetchall()
     cursor.close()
+    cnx.close()
 
     return table
 
@@ -554,10 +584,12 @@ def get_paid_invoices():
     LIMIT 100;
     """
 
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query)
     table = cursor.fetchall()
     cursor.close()
+    cnx.close()
 
     return table
 
@@ -571,10 +603,12 @@ def get_total_bookings():
     query = """SELECT IFNULL(COUNT(*), 0)
                FROM booking;
             """
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query)
     table = cursor.fetchall()
     cursor.close()
+    cnx.close()
 
     return table[0][0]
 
@@ -587,10 +621,12 @@ def get_total_revenue(unpaid=False):
         query = """SELECT IFNULL(SUM(amount), 0) FROM invoice
                    WHERE paid = 0;
                 """
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query)
     table = cursor.fetchall()
     cursor.close()
+    cnx.close()
 
     return "$%.2f" % float(table[0][0])
 
@@ -602,15 +638,18 @@ def update_bookings_by_month():
                GROUP BY MONTH(arrival), MONTHNAME(arrival)
                ORDER BY MONTH(arrival);
             """
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query)
     table = cursor.fetchall()
     cursor.close()
+    cnx.close()
 
     df = pd.DataFrame(table, columns=["M", "Month", "Bookings"])
     p = df.plot.bar(x="Month", y="Bookings", rot=0,
                     figsize=(8,3), xlabel="")
     plt.savefig('static/bookings_by_month.png', bbox_inches='tight')
+    plt.close('all')
 
 
 
@@ -622,10 +661,12 @@ def update_revenue_by_month():
                GROUP BY MONTH(paid_date), MONTHNAME(paid_date)
                ORDER BY MONTH(paid_date);
             """
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query)
     table = cursor.fetchall()
     cursor.close()
+    cnx.close()
 
     fig, ax = plt.subplots(1, 1, figsize=(8, 3))
     df = pd.DataFrame(table, columns=["M", "Month", "Revenue"])
@@ -636,6 +677,7 @@ def update_revenue_by_month():
     tick = mtick.StrMethodFormatter(fmt)
     ax.yaxis.set_major_formatter(tick)
     plt.savefig('static/revenue_by_month.png', bbox_inches='tight')
+    plt.close('all')
 
 
 def update_revenue_by_fee():
@@ -645,10 +687,12 @@ def update_revenue_by_fee():
                GROUP BY name
                ORDER BY revenue DESC;
             """
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query)
     table = cursor.fetchall()
     cursor.close()
+    cnx.close()
 
     fig, ax = plt.subplots(1, 1, figsize=(8, 3))
     df = pd.DataFrame(table, columns=["Fee", "Revenue"])
@@ -659,6 +703,7 @@ def update_revenue_by_fee():
     tick = mtick.StrMethodFormatter(fmt)
     ax.yaxis.set_major_formatter(tick)
     plt.savefig('static/revenue_by_fee.png', bbox_inches='tight')
+    plt.close('all')
 
 
 
@@ -668,10 +713,12 @@ def update_revenue_by_fee():
 
 def get_date():
     query = """SELECT NOW()"""
+    cnx = connect()
     cursor = cnx.cursor(prepared=True)
     cursor.execute(query)
     table = cursor.fetchall();
     cursor.close()
+    cnx.close()
     return table[0][0]
 
 
