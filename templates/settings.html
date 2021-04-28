@@ -56,17 +56,11 @@
     <div id="Date" class="w3-container tabname w3-animate-opacity">
       <h2>Date</h2>
 
-      <p>Adjust the current date.</p><br>
-
-      <p><b>Current Date: </b> {{ date }}</p>
-
-      <form action="/settings/admin" method="post">
-        <input type="hidden" name="command" value="change_date">
-        <input class="w3-input" type="date" name="date" required
-         value={{ date }}><br>
-        <input class="w3-button w3-theme" type="submit" name="submit"
-         value="Change Date">
-      </form>
+      <p>
+        This is the current date and time used in the database to determine
+        the status of bookings and invoices.
+      </p>
+      <p><b>{{ date }}</b></p>
 
       <br>
     </div>
@@ -75,7 +69,15 @@
     <div id="Help Guide" class="w3-container tabname w3-animate-opacity">
       <h2>Help Guide</h2>
 
-      <p>Coming soon...</p>
+      <p>
+        Resortology is a web app designed for hotel staff to manage aspects
+        of their resort. The app allows you store customer data, keep track of
+        bookings (so you don't overbook), and manage invoices and fees.
+      </p>
+
+      <h4>Database Diagram:</h4><br>
+      <img src="{{ url_for('static', filename='resortologyERD.png') }}"
+           class="w3-image" alt="[database ERD diagram]">
 
       <br>
     </div>

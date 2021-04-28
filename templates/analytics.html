@@ -1,0 +1,86 @@
+{% extends "layout.html" %}
+{% block page_title %}Analytics{% endblock %}
+{% block body %}
+    {{ super() }}
+
+    <p>
+      View insights about the resort and profits over the last year. Click
+      refresh data to update graphs.
+    </p>
+
+
+    <!-- TAB MANAGEMENT -->
+    <br>
+    <div class="w3-border">
+    <div class="w3-bar w3-white w3-border">
+      <button id="bookings" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Bookings')">
+        Bookings
+      </button>
+      <button id="revenue" class="w3-bar-item w3-button testbtn w3-padding-16"
+              onclick="openTab(event,'Revenue')">
+        Revenue
+      </button>
+    </div>
+
+
+    <!-- RESET -->
+    <div id="Bookings" class="w3-container tabname w3-animate-opacity">
+      <h2>Booking Insights</h2>
+
+      <br>
+      <h4>Total Bookings:</h4>
+      <h3>{{ bookings_tot }}</h3>
+      <br>
+
+      <h4>Bookings By Month:</h4>
+      <img src="{{ url_for('static', filename='bookings_by_month.png') }}"
+           class="w3-image" alt="[number of bookings by month]">
+      <br>
+
+      <br>
+    </div>
+
+
+    <!-- CHANGE DATE -->
+    <div id="Revenue" class="w3-container tabname w3-animate-opacity">
+      <h2>Revenue Insights</h2>
+
+      <br>
+      <h4>Total Revenue:</h4>
+      <h3>{{ revenue_tot }}</h3>
+      <br>
+
+      <h4>Unpaid Invoices Amount:</h4>
+      <h3>{{ unpaid_tot }}</h3>
+      <br>
+
+      <h4>Revenue By Month:</h4>
+      <img src="{{ url_for('static', filename='revenue_by_month.png') }}"
+           class="w3-image" alt="[number of bookings by month]">
+      <br>
+
+      <br>
+      <h4>Revenue From Fees:</h4>
+      <img src="{{ url_for('static', filename='revenue_by_fee.png') }}"
+           class="w3-image" alt="[number of bookings by month]">
+      <br>
+
+
+      <br>
+    </div>
+
+
+    <!-- OPEN SPECIFIED TAB -->
+    <script>
+      document.getElementById( "{{ tab }}" ).click();
+
+      window.onload = function() {
+        if(!window.location.hash) {
+          window.location = window.location + '#loaded';
+          window.location.reload();
+        }
+      }
+    </script>
+
+{% endblock %}

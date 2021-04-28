@@ -26,6 +26,7 @@ def root():
 
 @app.route("/customers")
 def customers(tab="add"):
+    db.connect()
     customer_table = db.get_customers_table()
     return render_template("customers.html", tab=tab,
                            customer_table=customer_table)
@@ -56,6 +57,7 @@ def delete_customer():
 def edit_customer():
     if request.method == 'POST':
         id = request.form['customer_id']
+        db.connect()
         c_info = db.get_customer_info(id)
         if (c_info is None):
             abort(404)
@@ -86,6 +88,8 @@ def edit_customer_process():
 
 @app.route("/resort")
 def resort(tab="view"):
+    db.connect()
+    db.update_available()
     room_table, floors = db.get_room_table()
     room_list = db.get_room_list()
     type_list = db.get_room_type_list()
@@ -160,6 +164,7 @@ def delete_fee():
 
 @app.route("/bookings")
 def bookings(tab="current"):
+    db.connect()
     active_bookings = db.get_active_bookings()
     past_bookings = db.get_past_bookings()
     upcoming_bookings = db.get_upcoming_bookings()
@@ -174,16 +179,18 @@ def bookings(tab="current"):
 @app.route("/bookings/add_booking", methods=['POST', 'GET'])
 def add_booking():
     if request.method == 'POST':
-
         err = ""
         if 'room_number' in request.form:
             form = request.form
+            db.set_transaction_isolation("REPEATABLE READ")
             if not db.is_valid_booking(form['room_number'], form['arrival'],
                                        form['nights']):
                 err = "Room %s is already booked during this timeframe" % (form['room_number'])
+                db.rollback_transaction()
             else:
                 db.add_booking(form['room_number'], form['customer_id'],
                                form['arrival'], form['nights'])
+                db.commit_transaction()
                 return bookings("add")
 
         c_info = db.get_customer_info(request.form['customer_id'])
@@ -208,12 +215,14 @@ def manage_fees():
     if request.method == 'POST':
         booking_id = request.form['booking_id']
 
+        db.set_transaction_isolation("READ COMMITTED")
         fees = db.get_fee_ids();
         if (len(list(request.form.keys())) > 2):
             for f in fees:
                 db.update_fee(booking_id, f, request.form[f])
             return bookings("current")
 
+        db.connect()
         fees = db.get_fees(booking_id)
         b_info = db.get_booking_info(booking_id)
         return render_template("manage_fees.html", b=b_info, fees=fees)
@@ -229,6 +238,7 @@ def manage_fees():
 
 @app.route("/invoices")
 def invoices(tab="unpaid"):
+    db.connect()
     current_invoices = db.get_current_invoices()
     overdue_invoices = db.get_overdue_invoices()
     paid_invoices = db.get_paid_invoices()
@@ -264,8 +274,25 @@ def invoice_unpay():
 # =====================
 
 @app.route("/analytics")
-def analytics(tab=""):
-    return "<h2>Feature coming soon"
+def analytics(tab="bookings"):
+    db.connect()
+    db.update_bookings_by_month()
+    db.update_revenue_by_month()
+    db.update_revenue_by_fee()
+    bookings_tot = db.get_total_bookings()
+    revenue_tot = db.get_total_revenue()
+    unpaid_tot = db.get_total_revenue(unpaid=True)
+    return render_template("analytics.html", tab=tab, bookings_tot=bookings_tot,
+                           revenue_tot=revenue_tot, unpaid_tot=unpaid_tot)
+
+
+@app.route("/analytics/refresh")
+def analytics_refresh():
+    db.connect()
+    db.update_bookings_by_month()
+    db.update_revenue_by_month()
+    db.update_revenue_by_fee()
+    return redirect(url_for('analytics'))
 
 
 
@@ -276,7 +303,7 @@ def analytics(tab=""):
 @app.route("/settings")
 def settings(tab="clear"):
     return render_template("settings.html", tab=tab,
-                           date=datetime.today().strftime('%Y-%m-%d'))
+                           date=db.get_date())
 
 
 @app.route("/settings/admin", methods=['POST', 'GET'])
@@ -286,14 +313,16 @@ def admin():
 
         if command == "clear_all":
             db.build_tables(reset=True, example_instance=False)
+            db.connect()
             return settings("clear")
 
         elif command == "clear_example":
             db.build_tables(reset=True, example_instance=True)
+            db.connect()
             return settings("clear")
 
         elif command == "change_date":
-            return "<h2>Feature not yet available"
+            return "<h2>Feature not yet available</h2>"
 
         return settings("clear")
     else:
@@ -308,6 +337,7 @@ if __name__ == "__main__":
 
     db.connect()
     db.connect_sqlalchemy()
+    db.setup_indexes()
     print("--> database connected")
 
     app.run(debug=True, host="127.0.0.1", port=5000)

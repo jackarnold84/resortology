@@ -9,11 +9,11 @@ class Customer(Base):
     __tablename__= 'customer'
 
     customer_id = Column(Integer, primary_key=True)
-    first_name = Column(String)
-    last_name = Column(String)
-    email = Column(String)
-    phone = Column(String)
-    zip_code = Column(String)
+    first_name = Column(String(30))
+    last_name = Column(String(30))
+    email = Column(String(50))
+    phone = Column(String(15))
+    zip_code = Column(String(5))
 
 
 class Booking(Base):
@@ -49,7 +49,7 @@ class RoomType(Base):
     __tablename__ = 'room_type'
 
     room_type_id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(String(50))
     capacity = Column(Integer)
     price = Column(Float)
 
@@ -66,5 +66,5 @@ class Fee(Base):
     __tablename__ = 'fee'
 
     fee_id = Column(Integer, primary_key=True)
-    name = Column(String)
+    name = Column(String(50))
     price = Column(Float(precision=2))

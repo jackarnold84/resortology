@@ -5,6 +5,10 @@ import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from models import *
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mtick
 from datetime import datetime
 
 
@@ -88,9 +92,55 @@ def build_tables(reset=False, example_instance=False):
     print("---> created tables")
 
     if example_instance:
+        connect()
         source_file(example_instance_path)
         print("---> initialized example instance")
 
+
+def setup_indexes():
+    idx1 = """CREATE INDEX bid_index ON booking (booking_id, arrival)
+              USING HASH"""
+    idx2 = """CREATE INDEX cid_index ON customer (customer_id) USING HASH"""
+    idx3 = """CREATE INDEX fid_index ON fee (fee_id) USING HASH"""
+
+    # create if does not already exist
+    cursor = cnx.cursor()
+    try:
+        cursor.execute(idx1)
+    except:
+        pass
+    try:
+        cursor.execute(idx2)
+    except:
+        pass
+    try:
+        cursor.execute(idx3)
+    except:
+        pass
+    cursor.close()
+    cnx.commit()
+    connect()
+
+
+# TRANSACTIONS
+def set_transaction_isolation(level="REPEATABLE READ"):
+    connect()
+    if level not in ["REPEATABLE READ", "READ COMMITTED",
+                     "READ UNCOMMITTED", "SERIALIZABLE"]:
+        return
+    query = """SET TRANSACTION ISOLATION LEVEL %s""" % level;
+
+    cursor = cnx.cursor()
+    cursor.execute(query)
+    cursor.close()
+
+def commit_transaction():
+    cnx.commit()
+    connect()
+
+
+def rollback_transaction():
+    connect()
 
 
 
@@ -216,6 +266,28 @@ def delete_fee(id):
     connect()
 
 
+def update_available():
+    query1 = """
+    UPDATE room
+    SET available = 1;
+    """
+
+    query2 = """
+    UPDATE room AS r
+    JOIN booking b on b.room_number = r.room_number
+    SET r.available = 0
+    WHERE DATE_ADD(b.arrival, INTERVAL nights DAY) >= CURRENT_DATE()
+          AND b.arrival <= CURRENT_DATE();
+    """
+
+    cursor = cnx.cursor(prepared=True)
+    cursor.execute(query1)
+    cursor.execute(query2)
+    cursor.close()
+    cnx.commit()
+    connect()
+
+
 # =====================
 # BOOKINGS TABLE
 # =====================
@@ -293,13 +365,17 @@ def is_valid_booking(room_number, arrival, nights):
 
 
 def add_booking(room_number, customer_id, arrival, nights):
-    new = Booking(room_number=room_number, customer_id=customer_id,
-                  arrival=arrival, nights=nights)
-    session.add(new)
-    session.commit()
-    connect()
+    query = """INSERT INTO booking (room_number, customer_id, arrival, nights)
+               VALUES (%s, %s, %s, %s)"""
+    cursor = cnx.cursor(prepared=True)
+    cursor.execute(query, (room_number, customer_id, arrival, nights))
 
-    setup_invoice(new.booking_id)
+    query = """SELECT LAST_INSERT_ID()"""
+    cursor.execute(query)
+    table = cursor.fetchall()
+    cursor.close()
+
+    setup_invoice(table[0][0])
 
 
 def delete_booking(id):
@@ -375,10 +451,11 @@ def update_fee(booking_id, fee_id, quantity):
 # =====================
 
 def setup_invoice(booking_id):
-    new = Invoice(booking_id=booking_id, amount=0.0, paid=0, paid_date=None)
-    session.add(new)
-    session.commit()
-    connect()
+    query = """INSERT INTO invoice (booking_id, amount, paid, paid_date)
+               VALUES (%s, 0.0, 0, NULL)"""
+    cursor = cnx.cursor(prepared=True)
+    cursor.execute(query, (booking_id, ))
+    cursor.close()
 
     update_invoice_amount(booking_id)
 
@@ -388,7 +465,7 @@ def update_invoice_amount(booking_id):
     query = """
     UPDATE invoice
     SET amount = (
-        SELECT MAX(rt.price) + IFNULL(SUM(f.price * bf.quantity), 0)
+        SELECT MAX(rt.price)*MAX(b.nights) + IFNULL(SUM(f.price * bf.quantity), 0)
         FROM booking b
         JOIN room r ON b.room_number = r.room_number
         JOIN room_type rt ON r.room_type_id = rt.room_type_id
@@ -404,6 +481,7 @@ def update_invoice_amount(booking_id):
     cursor.execute(query, (booking_id, booking_id))
     cursor.close()
     cnx.commit()
+    connect()
 
 
 def mark_as_paid(booking_id):
@@ -482,6 +560,119 @@ def get_paid_invoices():
     cursor.close()
 
     return table
+
+
+
+# =====================
+# ANALYTICS PAGES
+# =====================
+
+def get_total_bookings():
+    query = """SELECT IFNULL(COUNT(*), 0)
+               FROM booking;
+            """
+    cursor = cnx.cursor(prepared=True)
+    cursor.execute(query)
+    table = cursor.fetchall()
+    cursor.close()
+
+    return table[0][0]
+
+
+def get_total_revenue(unpaid=False):
+    query = """SELECT IFNULL(SUM(amount), 0) FROM invoice
+               WHERE paid = 1;
+            """
+    if unpaid:
+        query = """SELECT IFNULL(SUM(amount), 0) FROM invoice
+                   WHERE paid = 0;
+                """
+    cursor = cnx.cursor(prepared=True)
+    cursor.execute(query)
+    table = cursor.fetchall()
+    cursor.close()
+
+    return "$%.2f" % float(table[0][0])
+
+
+def update_bookings_by_month():
+    query = """SELECT MONTH(arrival), MONTHNAME(arrival), COUNT(*)
+               FROM booking
+               WHERE YEAR(arrival) = YEAR(CURRENT_DATE())
+               GROUP BY MONTH(arrival), MONTHNAME(arrival)
+               ORDER BY MONTH(arrival);
+            """
+    cursor = cnx.cursor(prepared=True)
+    cursor.execute(query)
+    table = cursor.fetchall()
+    cursor.close()
+
+    df = pd.DataFrame(table, columns=["M", "Month", "Bookings"])
+    p = df.plot.bar(x="Month", y="Bookings", rot=0,
+                    figsize=(8,3), xlabel="")
+    plt.savefig('static/bookings_by_month.png', bbox_inches='tight')
+
+
+
+def update_revenue_by_month():
+    query = """SELECT MONTH(paid_date), MONTHNAME(paid_date), SUM(amount)
+               FROM invoice
+               WHERE YEAR(paid_date) = YEAR(CURRENT_DATE())
+                 AND paid = 1
+               GROUP BY MONTH(paid_date), MONTHNAME(paid_date)
+               ORDER BY MONTH(paid_date);
+            """
+    cursor = cnx.cursor(prepared=True)
+    cursor.execute(query)
+    table = cursor.fetchall()
+    cursor.close()
+
+    fig, ax = plt.subplots(1, 1, figsize=(8, 3))
+    df = pd.DataFrame(table, columns=["M", "Month", "Revenue"])
+    df["Revenue"] = pd.to_numeric(df["Revenue"])
+    p = df.plot.bar(x="Month", y="Revenue", rot=0,
+                    xlabel="", ax=ax, color="green")
+    fmt = '${x:,.0f}'
+    tick = mtick.StrMethodFormatter(fmt)
+    ax.yaxis.set_major_formatter(tick)
+    plt.savefig('static/revenue_by_month.png', bbox_inches='tight')
+
+
+def update_revenue_by_fee():
+    query = """SELECT name, SUM(quantity) * MAX(price) AS revenue
+               FROM fee f
+               JOIN booking_fee bf ON f.fee_id = bf.fee_id
+               GROUP BY name
+               ORDER BY revenue DESC;
+            """
+    cursor = cnx.cursor(prepared=True)
+    cursor.execute(query)
+    table = cursor.fetchall()
+    cursor.close()
+
+    fig, ax = plt.subplots(1, 1, figsize=(8, 3))
+    df = pd.DataFrame(table, columns=["Fee", "Revenue"])
+    df["Revenue"] = pd.to_numeric(df["Revenue"])
+    p = df.plot.bar(x="Fee", y="Revenue", rot=0,
+                    xlabel="", ax=ax, color="orange")
+    fmt = '${x:,.0f}'
+    tick = mtick.StrMethodFormatter(fmt)
+    ax.yaxis.set_major_formatter(tick)
+    plt.savefig('static/revenue_by_fee.png', bbox_inches='tight')
+
+
+
+# =====================
+# SETTINGS PAGES
+# =====================
+
+def get_date():
+    query = """SELECT NOW()"""
+    cursor = cnx.cursor(prepared=True)
+    cursor.execute(query)
+    table = cursor.fetchall();
+    cursor.close()
+    return table[0][0]
 
 
 
