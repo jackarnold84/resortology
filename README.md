@@ -19,6 +19,8 @@ and managers.
 3. run `python app.py`
 4. open a web browser and go to `http://127.0.0.1:5000/`
 
-### Database:
+### Connect to database:
 
-The app uses a MySQL database hosted on Google Cloud Platform.
+The app uses a MySQL database hosted on Google Cloud Platform. To connect, the appropriate connection
+info must be provided in the file `db_connect_info.json`. Additonally, the path variable 
+`connect_file_path` must be set accordingly in `database.py`.
