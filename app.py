@@ -264,14 +264,15 @@ def invoice_unpay():
 
 @app.route("/analytics")
 def analytics(tab="bookings"):
-    db.update_bookings_by_month()
-    db.update_revenue_by_month()
-    db.update_revenue_by_fee()
+    s1 = db.update_bookings_by_month()
+    s2 = db.update_revenue_by_month()
+    s3 = db.update_revenue_by_fee()
     bookings_tot = db.get_total_bookings()
     revenue_tot = db.get_total_revenue()
     unpaid_tot = db.get_total_revenue(unpaid=True)
     return render_template("analytics.html", tab=tab, bookings_tot=bookings_tot,
-                           revenue_tot=revenue_tot, unpaid_tot=unpaid_tot)
+                           revenue_tot=revenue_tot, unpaid_tot=unpaid_tot,
+                           book_by_mo=s1, rev_by_mo=s2, rev_by_fee=s3)
 
 
 @app.route("/analytics/refresh")

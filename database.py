@@ -157,6 +157,7 @@ def rollback_transaction():
 # =====================
 
 def get_customers_table():
+    connect_sqlalchemy()
     return Customer.query.all()
 
 
@@ -515,7 +516,7 @@ def update_invoice_amount(cnx, booking_id):
 def mark_as_paid(booking_id):
     invoice = Invoice.query.filter_by(booking_id=booking_id).first()
     invoice.paid = 1
-    invoice.paid_date = date=datetime.today().strftime('%Y-%m-%d')
+    invoice.paid_date = date.datetime.today().strftime('%Y-%m-%d')
     session.commit()
 
 
@@ -646,10 +647,7 @@ def update_bookings_by_month():
     cnx.close()
 
     df = pd.DataFrame(table, columns=["M", "Month", "Bookings"])
-    p = df.plot.bar(x="Month", y="Bookings", rot=0,
-                    figsize=(8,3), xlabel="")
-    plt.savefig('static/bookings_by_month.png', bbox_inches='tight')
-    plt.close('all')
+    return str(df[['Month', 'Bookings']].values.tolist())
 
 
 
@@ -668,16 +666,10 @@ def update_revenue_by_month():
     cursor.close()
     cnx.close()
 
-    fig, ax = plt.subplots(1, 1, figsize=(8, 3))
     df = pd.DataFrame(table, columns=["M", "Month", "Revenue"])
     df["Revenue"] = pd.to_numeric(df["Revenue"])
-    p = df.plot.bar(x="Month", y="Revenue", rot=0,
-                    xlabel="", ax=ax, color="green")
-    fmt = '${x:,.0f}'
-    tick = mtick.StrMethodFormatter(fmt)
-    ax.yaxis.set_major_formatter(tick)
-    plt.savefig('static/revenue_by_month.png', bbox_inches='tight')
-    plt.close('all')
+    return str(df[['Month', 'Revenue']].values.tolist())
+
 
 
 def update_revenue_by_fee():
@@ -694,16 +686,9 @@ def update_revenue_by_fee():
     cursor.close()
     cnx.close()
 
-    fig, ax = plt.subplots(1, 1, figsize=(8, 3))
     df = pd.DataFrame(table, columns=["Fee", "Revenue"])
     df["Revenue"] = pd.to_numeric(df["Revenue"])
-    p = df.plot.bar(x="Fee", y="Revenue", rot=0,
-                    xlabel="", ax=ax, color="orange")
-    fmt = '${x:,.0f}'
-    tick = mtick.StrMethodFormatter(fmt)
-    ax.yaxis.set_major_formatter(tick)
-    plt.savefig('static/revenue_by_fee.png', bbox_inches='tight')
-    plt.close('all')
+    return str(df[['Fee', 'Revenue']].values.tolist())
 
 
 

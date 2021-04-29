@@ -8,6 +8,8 @@
       refresh data to update graphs.
     </p>
 
+    <script src="https://cdn.anychart.com/releases/8.0.0/js/anychart-base.min.js"></script>
+
 
     <!-- TAB MANAGEMENT -->
     <br>
@@ -34,9 +36,28 @@
       <br>
 
       <h4>Bookings By Month:</h4>
-      <img src="{{ url_for('static', filename='bookings_by_month.png') }}"
-           class="w3-image" alt="[number of bookings by month]">
-      <br>
+      <div id="container1" style="width: 100%; height: 400px"></div>
+      <script>
+        anychart.onDocumentReady(function() {
+
+          // set the data
+          var data = {
+              header: ["Month", "Bookings"],
+              rows:
+              {{ book_by_mo|safe }}
+          };
+
+          // create the chart
+          var chart = anychart.column();
+
+          // add the data
+          chart.data(data);
+
+          // draw
+          chart.container("container1");
+          chart.draw();
+        });
+      </script>
 
       <br>
     </div>
@@ -56,15 +77,53 @@
       <br>
 
       <h4>Revenue By Month:</h4>
-      <img src="{{ url_for('static', filename='revenue_by_month.png') }}"
-           class="w3-image" alt="[number of bookings by month]">
-      <br>
+      <div id="container2" style="width: 100%; height: 400px"></div>
+      <script>
+        anychart.onDocumentReady(function() {
+
+          // set the data
+          var data = {
+              header: ["Month", "Revenue"],
+              rows:
+              {{ rev_by_mo|safe }}
+          };
+
+          // create the chart
+          var chart = anychart.column();
+
+          // add the data
+          chart.data(data);
+
+          // draw
+          chart.container("container2");
+          chart.draw();
+        });
+      </script>
 
       <br>
       <h4>Revenue From Fees:</h4>
-      <img src="{{ url_for('static', filename='revenue_by_fee.png') }}"
-           class="w3-image" alt="[number of bookings by month]">
-      <br>
+      <div id="container3" style="width: 100%; height: 400px"></div>
+      <script>
+        anychart.onDocumentReady(function() {
+
+          // set the data
+          var data = {
+              header: ["Fee", "Revenue"],
+              rows:
+              {{ rev_by_fee|safe }}
+          };
+
+          // create the chart
+          var chart = anychart.column();
+
+          // add the data
+          chart.data(data);
+
+          // draw
+          chart.container("container3");
+          chart.draw();
+        });
+      </script>
 
 
       <br>
